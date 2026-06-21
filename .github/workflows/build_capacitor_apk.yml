@@ -43,7 +43,8 @@ jobs:
         run: cd worldcup_app && npx cap sync android
 
       - name: Build Android APK
-        run: cd worldcup_app/android && ./gradlew assembleDebug
+        run: cd worldcup_app/android && chmod +x gradlew && ./gradlew assembleDebug
+
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
