@@ -2,9 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main, master]
-    paths:
-      - 'worldcup_app/**'
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -22,41 +20,22 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: 21
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 10406996
-
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
-
-      - name: Install Android SDK components
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          distribution: 'temurin'
 
       - name: Install dependencies
-        run: cd worldcup_app && npm ci
+        run: |
+          cd worldcup_app
+          npm install
+          npx cap sync android
 
-      - name: Sync Capacitor
-        run: cd worldcup_app && npx cap sync android
-
-      - name: Build Android APK
-        run: cd worldcup_app/android && chmod +x gradlew && ./gradlew assembleDebug
-
+      - name: Build APK
+        run: |
+          cd worldcup_app/android
+          chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: worldcup-apk
           path: worldcup_app/android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-
-      - name: Upload build log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: worldcup_app/android/app/build/outputs/
-          if-no-files-found: ignore
